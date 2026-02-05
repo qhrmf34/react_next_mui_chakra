@@ -69,7 +69,7 @@ export default function DemoSections({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [switchOn, setSwitchOn] = useState(false);
 
-  // ✅ Users CRUD dialog state
+  //  Users CRUD dialog state
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [mode, setMode] = useState<"create" | "edit">("create");
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -286,7 +286,7 @@ export default function DemoSections({
         <MuiModal />
       </Paper>
 
-      {/* ✅ 7. Users CRUD */}
+      {/*  7. Users CRUD */}
       <Paper elevation={2} sx={{ p: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6">7. Users (CRUD)</Typography>

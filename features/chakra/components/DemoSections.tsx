@@ -12,9 +12,17 @@ import {
   Text,
   Textarea,
   HStack,
+  DialogRoot,
+  DialogBackdrop,
+  DialogPositioner,
+  DialogContent,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  DialogTitle,
+  DialogCloseTrigger,
 } from "@chakra-ui/react";
-import { FiPlus, FiTrash2, FiShoppingCart } from "react-icons/fi";
-
+import { FiPlus, FiTrash2, FiShoppingCart, FiEdit2 } from "react-icons/fi";
 import { Radio, RadioGroup } from "@/components/ui/radio";
 import { Field } from "@/components/ui/field";
 import { Avatar } from "@/components/ui/avatar";
@@ -25,6 +33,10 @@ type Props = {
   products: Product[];
   users: User[];
   onAddToCart: () => void;
+
+  onCreateUser: (payload: {name: string; email:string}) => Promise<void>;
+  onUpdateUser: (id: number, payload: {name:string; email:string}) => Promise<void>;
+  onDeleteUser: (id: number) => Promise<void>;
 };
 
 // 재사용 가능한 Section 컴포넌트
@@ -39,12 +51,61 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default function DemoSections({ products, users, onAddToCart }: Props) {
+export default function DemoSections({
+  products,
+  users,
+  onAddToCart,
+  onCreateUser,
+  onUpdateUser,
+  onDeleteUser }: Props) {
   const [name, setName] = useState("");
   const [memo, setMemo] = useState("");
   const [age, setAge] = useState("");
   const [checked, setChecked] = useState(false);
   const [gender, setGender] = useState("male");
+
+  // Users CRUD dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [mode, setMode] = useState<"create" | "edit">("create");
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [uName, setUName] = useState("");
+  const [uEmail, setUEmail] = useState("");
+
+  const openCreate = () => {
+    setMode("create");
+    setEditingUser(null);
+    setUName("");
+    setUEmail("");
+    setDialogOpen(true);
+  };
+
+  const openEdit = (u: User) => {
+    setMode("edit");
+    setEditingUser(u);
+    setUName(u.name);
+    setUEmail(u.email);
+    setDialogOpen(true);
+  };
+
+  const submitUser = async () => {
+    if (!uName.trim() || !uEmail.trim()) {
+      alert("이름/이메일을 입력하세요.");
+      return;
+    }
+    try {
+      if (mode === "create") {
+        await onCreateUser({ name: uName, email: uEmail });
+      } else if (editingUser) {
+        await onUpdateUser(editingUser.id, { name: uName, email: uEmail });
+      }
+      setDialogOpen(false);
+    } catch {
+      alert("저장 실패 (중복 이메일/서버 오류 가능)");
+    }
+  };
+
+  
+
 
   return (
     <Stack gap={4} p={4}>
@@ -131,13 +192,20 @@ export default function DemoSections({ products, users, onAddToCart }: Props) {
         </Stack>
       </Section>
 
-      {/* 5) Users List 섹션 (에러 지점 수정됨) */}
-      <Section title="5) Users List">
+      {/* 5) Users List 섹션 (CRUD) */}
+      <Section title="5) Users (CRUD)">
         <Stack gap={4}>
+          <HStack justify="space-between">
+            <Text fontWeight="medium">유저 목록</Text>
+            <Button size="sm" onClick={openCreate}>
+              <FiPlus style={{ marginRight: 8 }} />
+              유저 추가
+            </Button>
+          </HStack>
+
           {users.map((u) => (
             <HStack key={u.id} justify="space-between">
               <HStack gap={3}>
-                {/* @/components/ui/avatar 에서 가져온 컴포넌트 사용 */}
                 <Avatar size="sm" name={u.name} />
                 <Box>
                   <Text fontWeight="medium">{u.name}</Text>
@@ -146,13 +214,53 @@ export default function DemoSections({ products, users, onAddToCart }: Props) {
                   </Text>
                 </Box>
               </HStack>
-              <Button size="sm" variant="outline">
-                <FiTrash2 style={{ marginRight: 8 }} />
-                삭제
-              </Button>
+              <HStack gap={2}>
+                <Button size="sm" variant="outline" onClick={() => openEdit(u)}>
+                  <FiEdit2 style={{ marginRight: 4 }} />
+                  수정
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  colorPalette="red"
+                  onClick={() => {
+                    if (confirm("정말 삭제할까요?")) onDeleteUser(u.id);
+                  }}
+                >
+                  <FiTrash2 style={{ marginRight: 4 }} />
+                  삭제
+                </Button>
+              </HStack>
             </HStack>
           ))}
         </Stack>
+
+        {/* User Dialog */}
+        <DialogRoot open={dialogOpen} onOpenChange={(e) => setDialogOpen(e.open)}>
+          <DialogBackdrop />
+          <DialogPositioner>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{mode === "create" ? "유저 추가" : "유저 수정"}</DialogTitle>
+                <DialogCloseTrigger />
+              </DialogHeader>
+              <DialogBody>
+                <Stack gap={4}>
+                  <Field label="이름">
+                    <Input value={uName} onChange={(e) => setUName(e.target.value)} placeholder="이름 입력" />
+                  </Field>
+                  <Field label="이메일">
+                    <Input value={uEmail} onChange={(e) => setUEmail(e.target.value)} placeholder="이메일 입력" />
+                  </Field>
+                </Stack>
+              </DialogBody>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>취소</Button>
+                <Button onClick={submitUser}>저장</Button>
+              </DialogFooter>
+            </DialogContent>
+          </DialogPositioner>
+        </DialogRoot>
       </Section>
 
       {/* 6) Products Grid 섹션 */}
