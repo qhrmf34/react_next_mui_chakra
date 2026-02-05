@@ -38,6 +38,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Switch from "@mui/material/Switch";
 import MuiModal from "./MuiModal";
+import UserTable from "./UserTable";
 
 type Product = { id: number; name: string; price: string };
 type User = { id: number; name: string; email: string };
@@ -378,7 +379,8 @@ export default function DemoSections({
         </Grid>
       </Paper>
 
-      {/* ... (9,10 섹션은 네 기존 그대로 두면 됨) */}
+      {/* 9. UserTable 컴포넌트 (별도 파일) */}
+      <UserTable users={users} onEdit={openEdit} />
     </Stack>
   );
 }
