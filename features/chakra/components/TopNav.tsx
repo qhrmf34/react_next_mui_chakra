@@ -25,7 +25,14 @@ type Props = { cartCount: number };
 
 export default function TopNav({ cartCount }: Props) {
   return (
-    <Box borderBottomWidth="1px" px={4} py={3} bg="white">
+    <Box
+      borderBottomWidth="1px"
+      px={4}
+      py={3}
+      bg="bg"
+      color="fg"
+      borderColor="border"
+    >
       <Flex align="center">
         <Heading size="md">Chakra 컴포넌트 연습장</Heading>
         <Spacer />

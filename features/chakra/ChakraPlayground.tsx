@@ -8,6 +8,7 @@ import { products, users } from "./data";
 
 export default function ChakraPlayground() {
   const [cartCount, setCartCount] = useState(3);
+  
 
   const handleAddToCart = () => {
     setCartCount((prev) => prev + 1);
@@ -15,9 +16,14 @@ export default function ChakraPlayground() {
   };
 
   return (
-    <Box>
+    <Box bg="bg" color="fg" minH="100vh">
       <TopNav cartCount={cartCount} />
-      <DemoSections products={products} users={users} onAddToCart={handleAddToCart} />
+      <DemoSections
+        users={users}
+        products={products}
+        onAddToCart={handleAddToCart}
+      />
     </Box>
   );
+
 }
